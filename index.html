@@ -3,34 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Pro — Performance Premium</title>
+  <title>Hermes Dashboard — Premium Operations</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
       --primary: #0058A3;
+      --primary-light: #4A90E2;
       --secondary: #FFDB00;
       --background: #0A0A0A;
-      --surface: #111111;
-      --surface-variant: #1A1A1A;
+      --surface: rgba(17, 17, 17, 0.6);
+      --surface-variant: rgba(26, 26, 26, 0.6);
+      --surface-highlight: rgba(42, 42, 42, 0.4);
       --text-primary: #FFFFFF;
       --text-secondary: #A0A0A0;
-      --border: #2A2A2A;
+      --border: rgba(255,255,255,0.1);
       --success: #34C759;
       --warning: #FF9500;
       --danger: #FF3B30;
+      --info: #5AC8FA;
       --radius: 16px;
-      --shadow: 0 4px 20px rgba(0,0,0,0.4);
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
     * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--background);
       color: var(--text-primary);
       min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content:"";
+      position:fixed;
+      inset:0;
+      background:radial-gradient(circle at 20% 30%, rgba(0,88,163,0.08) 0%, transparent 40%),
+                 radial-gradient(circle at 80% 70%, rgba(255,219,0,0.06) 0%, transparent 40%);
+      pointer-events:none;
+      z-index:-2;
     }
     .header {
       background: var(--surface);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 16px 32px;
       display: flex;
@@ -39,28 +57,60 @@
       position: sticky;
       top:0;
       z-index:100;
+      animation: slideDown 0.6s var(--transition);
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity:0; }
+      to { transform: translateY(0); opacity:1; }
     }
     .logo { display:flex; align-items:center; gap:12px; }
     .logo-icon {
-      width:40px; height:40px;
-      background:var(--primary);
-      border-radius:10px;
+      width:44px; height:44px;
+      background:linear-gradient(135deg, var(--primary), var(--primary-light));
+      border-radius:12px;
       display:flex; align-items:center; justify-content:center;
-      color:white; font-weight:700; font-size:14px;
+      color:white; font-weight:700; font-size:16px;
+      box-shadow:var(--shadow-sm);
     }
-    .logo-text h1 { font-size:18px; font-weight:700; }
+    .logo-text h1 { font-size:19px; font-weight:700; letter-spacing:-0.5px; }
     .logo-text span { font-size:13px; color:var(--text-secondary); }
     .nav { display:flex; gap:8px; }
     .nav button {
-      padding:8px 16px; border-radius:8px;
+      padding:8px 16px; border-radius:10px;
       border:none; background:transparent;
       font-size:14px; font-weight:500;
       cursor:pointer; color:var(--text-secondary);
-      transition:all 0.2s;
+      transition:var(--transition);
+      position:relative;
+      overflow:hidden;
     }
-    .nav button.active { background:var(--primary); color:white; }
-    .nav button:hover:not(.active) { background:var(--surface-variant); }
+    .nav button::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(90deg, transparent, var(--primary), transparent);
+      transform:translateX(-100%);
+      transition:transform 0.4s;
+    }
+    .nav button:hover::after { transform:translateX(100%); }
+    .nav button.active { 
+      background:var(--surface-variant); 
+      color:var(--primary);
+      box-shadow:inset 0 0 0 2px var(--primary);
+    }
+    .nav button:hover:not(.active) { background:var(--surface-highlight); }
     .container { max-width:1600px; margin:0 auto; padding:24px 32px; }
+    .animate-fade-in {
+      animation: fadeInUp 0.6s var(--transition) forwards;
+      opacity:0;
+    }
+    @keyframes fadeInUp {
+      from { opacity:0; transform: translateY(20px); }
+      to { opacity:1; transform: translateY(0); }
+    }
+    .animate-fade-in.delay-1 { animation-delay:0.1s; }
+    .animate-fade-in.delay-2 { animation-delay:0.2s; }
+    .animate-fade-in.delay-3 { animation-delay:0.3s; }
+    .animate-fade-in.delay-4 { animation-delay:0.4s; }
+    .animate-fade-in.delay-5 { animation-delay:0.5s; }
     /* KPI */
     .kpi-grid {
       display:grid;
@@ -70,15 +120,28 @@
     }
     .kpi-card {
       background:var(--surface);
+      backdrop-filter: blur(8px);
       border-radius:var(--radius);
       padding:20px;
-      box-shadow:var(--shadow);
       border:1px solid var(--border);
-      transition:transform 0.2s;
+      box-shadow:var(--shadow);
+      transition:var(--transition);
+      position:relative;
+      overflow:hidden;
     }
-    .kpi-card:hover { transform:translateY(-2px); }
-    .kpi-label { font-size:12px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
-    .kpi-value { font-size:32px; font-weight:700; margin-bottom:4px; }
+    .kpi-card::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(90deg, transparent, var(--primary), transparent);
+      transform:translateX(-100%);
+      transition:transform 0.4s;
+    }
+    .kpi-card:hover::before { transform:translateX(100%); }
+    .kpi-card:hover { 
+      transform:translateY(-4px);
+      box-shadow:0 8px 32px rgba(0,0,0,0.5);
+    }
+    .kpi-label { font-size:12px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; font-weight:600; }
+    .kpi-value { font-size:30px; font-weight:700; margin-bottom:4px; line-height:1; }
     .kpi-delta { font-size:13px; font-weight:500; display:flex; align-items:center; gap:4px; }
     .kpi-delta.up { color:var(--success); }
     .kpi-delta.down { color:var(--danger); }
@@ -92,31 +155,45 @@
     }
     .card {
       background:var(--surface);
+      backdrop-filter: blur(8px);
       border-radius:var(--radius);
       padding:24px;
-      box-shadow:var(--shadow);
       border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      transition:var(--transition);
+      position:relative;
+      overflow:hidden;
+    }
+    .card::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg, rgba(255,255,255,0.03), transparent);
+      pointer-events:none;
+    }
+    .card:hover { 
+      transform:translateY(-2px);
+      box-shadow:0 12px 36px rgba(0,0,0,0.5);
     }
     .card-header {
       display:flex; justify-content:space-between; align-items:center;
       margin-bottom:20px;
     }
-    .card-title { font-size:16px; font-weight:600; }
-    .card-action { font-size:13px; color:var(--primary); cursor:pointer; font-weight:500; }
+    .card-title { font-size:17px; font-weight:600; display:flex; align-items:center; gap:8px; }
+    .card-action { font-size:13px; color:var(--primary); cursor:pointer; font-weight:500; display:flex; align-items:center; gap:4px; transition:0.2s; }
+    .card-action:hover { opacity:0.8; }
     .chart-container { height:280px; position:relative; }
     /* Region bars */
     .region-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:20px; margin-bottom:20px; }
     .region-item { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
     .region-name { font-size:14px; font-weight:500; }
     .region-bar-bg { flex:1; margin:0 12px; height:8px; background:var(--surface-variant); border-radius:4px; overflow:hidden; }
-    .region-bar-fill { height:100%; border-radius:4px; transition:width 0.6s ease; }
+    .region-bar-fill { height:100%; border-radius:4px; transition:width 0.8s ease; background:linear-gradient(90deg, var(--success), var(--primary)); }
     .region-value { font-size:14px; font-weight:600; min-width:40px; text-align:right; }
     /* Table */
     .table-card { margin-bottom:20px; overflow-x:auto; }
     table { width:100%; border-collapse:collapse; }
     th { text-align:left; padding:12px 16px; font-size:12px; text-transform:uppercase; color:var(--text-secondary); font-weight:600; letter-spacing:0.3px; border-bottom:1px solid var(--border); }
     td { padding:14px 16px; font-size:14px; border-bottom:1px solid var(--border); }
-    tr:hover td { background:var(--surface-variant); }
+    tr:hover td { background:var(--surface-highlight); }
     .status { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; }
     .status.green { background:rgba(52,199,89,0.12); color:var(--success); }
     .status.orange { background:rgba(255,149,0,0.12); color:var(--warning); }
@@ -126,32 +203,42 @@
     .alert-card { border-left:4px solid var(--danger); }
     .alert-item { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
     .alert-item:last-child { border-bottom:none; }
-    .alert-icon { width:32px; height:32px; background:rgba(255,59,48,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--danger); font-size:14px; }
+    .alert-icon { width:36px; height:36px; background:rgba(255,59,48,0.1); border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--danger); font-size:16px; }
     .alert-text { flex:1; }
     .alert-title { font-size:14px; font-weight:500; }
-    .alert-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+    .alert-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; line-height:1.4; }
     .alert-time { font-size:12px; color:var(--text-secondary); white-space:nowrap; }
     .filters { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
     .filter-btn {
-      padding:8px 16px; border-radius:8px;
+      padding:8px 16px; border-radius:10px;
       border:1px solid var(--border); background:var(--surface);
-      font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;
+      font-size:13px; cursor:pointer; display:flex; align-items-center; gap:6px;
+      transition:var(--transition);
     }
-    .filter-btn.active { border-color:var(--primary); color:var(--primary); }
+    .filter-btn.active { border-color:var(--primary); color:var(--primary); background:rgba(0,88,163,0.1); }
+    .filter-btn:hover:not(.active) { background:var(--surface-highlight); }
     @media (max-width:1024px) {
       .main-grid { grid-template-columns:1fr; }
       .container { padding:16px; }
       .kpi-grid { grid-template-columns:repeat(2,1fr); }
+    }
+    @media (max-width:600px) {
+      .kpi-grid { grid-template-columns:1fr; }
+      .header { padding:12px 20px; }
+      .logo-icon { width:36px; height:36px; font-size:14px; }
+      .logo-text h1 { font-size:16px; }
+      .nav { gap:6px; }
+      .nav button { padding:6px 12px; font-size:13px; }
     }
   </style>
 </head>
 <body>
   <header class="header">
     <div class="logo">
-      <div class="logo-icon">PRO</div>
+      <div class="logo-icon">H</div>
       <div class="logo-text">
-        <h1>Dashboard Premium</h1>
-        <span>Performance en temps réel — Opérations avancées</span>
+        <h1>Hermes Ops</h1>
+        <span>Tableau de bord professionnel — Monitoring en temps réel</span>
       </div>
     </div>
     <nav class="nav">
@@ -164,7 +251,7 @@
 
   <main class="container">
     <!-- Filtres -->
-    <div class="filters">
+    <div class="filters animate-fade-in delay-1">
       <button class="filter-btn active">📅 Aujourd'hui</button>
       <button class="filter-btn">📅 Cette semaine</button>
       <button class="filter-btn">📅 Ce mois</button>
@@ -173,7 +260,7 @@
     </div>
 
     <!-- KPIs -->
-    <div class="kpi-grid">
+    <div class="kpi-grid animate-fade-in delay-2">
       <div class="kpi-card">
         <div class="kpi-label">Revenue quotidien</div>
         <div class="kpi-value" style="color:var(--primary);">€42,350</div>
@@ -198,7 +285,7 @@
 
     <!-- Main Charts -->
     <div class="main-grid">
-      <div class="card">
+      <div class="card animate-fade-in delay-3">
         <div class="card-header">
           <span class="card-title">📈 Tendances de performance — 30 jours</span>
           <span class="card-action">Exporter →</span>
@@ -207,7 +294,7 @@
           <canvas id="trendChart"></canvas>
         </div>
       </div>
-      <div class="card">
+      <div class="card animate-fade-in delay-4">
         <div class="card-header">
           <span class="card-title">🏆 Top 5 services</span>
           <span class="card-action">Voir tout →</span>
@@ -219,27 +306,27 @@
     </div>
 
     <!-- Régions -->
-    <div class="card region-grid" style="display:block;">
+    <div class="card animate-fade-in delay-5">
       <div class="card-header">
         <span class="card-title">🗺️ Performance par zone géographique</span>
         <span class="card-action">Carte détaillée →</span>
       </div>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:20px;">
         <div>
-          <div class="region-item"><span class="region-name">Europe Ouest</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:92%;background:var(--success)"></div></div><span class="region-value">92%</span></div>
-          <div class="region-item"><span class="region-name">Europe Nord</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:89%;background:var(--success)"></div></div><span class="region-value">89%</span></div>
-          <div class="region-item"><span class="region-name">Méditerranée</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:85%;background:var(--warning)"></div></div><span class="region-value">85%</span></div>
+          <div class="region-item"><span class="region-name">Europe Ouest</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:92%;"></div></div><span class="region-value">92%</span></div>
+          <div class="region-item"><span class="region-name">Europe Nord</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:89%;"></div></div><span class="region-value">89%</span></div>
+          <div class="region-item"><span class="region-name">Méditerranée</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:85%;background:var(--warning);"></div></div><span class="region-value">85%</span></div>
         </div>
         <div>
-          <div class="region-item"><span class="region-name">Amérique Nord</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:90%;background:var(--success)"></div></div><span class="region-value">90%</span></div>
-          <div class="region-item"><span class="region-name">Amérique Sud</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:78%;background:var(--warning)"></div></div><span class="region-value">78%</span></div>
-          <div class="region-item"><span class="region-name">Asie-Pacifique</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:82%;background:var(--primary)"></div></div><span class="region-value">82%</span></div>
+          <div class="region-item"><span class="region-name">Amérique Nord</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:90%;"></div></div><span class="region-value">90%</span></div>
+          <div class="region-item"><span class="region-name">Amérique Sud</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:78%;background:var(--warning);"></div></div><span class="region-value">78%</span></div>
+          <div class="region-item"><span class="region-name">Asie-Pacifique</span><div class="region-bar-bg"><div class="region-bar-fill" style="width:82%;background:var(--primary);"></div></div><span class="region-value">82%</span></div>
         </div>
       </div>
     </div>
 
     <!-- Tableau détaillé -->
-    <div class="card table-card">
+    <div class="card animate-fade-in">
       <div class="card-header">
         <span class="card-title">🔍 Détails des services critiques</span>
         <span class="card-action">Exporter CSV →</span>
@@ -307,7 +394,7 @@
     </div>
 
     <!-- Alertes -->
-    <div class="card alert-card">
+    <div class="card alert-card animate-fade-in">
       <div class="card-header">
         <span class="card-title">🚨 Alertes critiques & incidents</span>
         <span class="card-action">Voir tout →</span>
@@ -316,7 +403,7 @@
         <div class="alert-icon">⚠️</div>
         <div class="alert-text">
           <div class="alert-title">Database Cluster — Latence en hausse</div>
-          <div class="alert-desc">Latence passée de 8ms à 14ms sur les  dernières 30min. Vérifier la charge réseau.</div>
+          <div class="alert-desc">Latence passée de 8ms à 14ms sur les dernières 30min. Vérifier la charge réseau.</div>
         </div>
         <span class="alert-time">Il y a 5min</span>
       </div>
@@ -402,6 +489,10 @@
             grid: { display: false },
             ticks: { font: { size: 11 } }
           }
+        },
+        animation: {
+          duration: 1500,
+          easing: 'easeOutQuart'
         }
       }
     });
@@ -432,9 +523,26 @@
         scales: {
           y: { max: 100, grid: { color: 'var(--border)' }, ticks: { font: { size: 11 } } },
           x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        },
+        animation: {
+          duration: 1800,
+          easing: 'easeOutBack'
         }
       }
     });
+
+    // Animate elements on scroll (optional)
+    const observerOptions = { threshold: 0.1 };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-fade-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.animate-fade-in').forEach(el => observer.observe(el));
   </script>
 </body>
 </html>
